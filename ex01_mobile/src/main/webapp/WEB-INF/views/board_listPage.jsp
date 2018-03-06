@@ -53,8 +53,8 @@ ons.ready(function() {
 <ons-page>
   <ons-toolbar>
     <div class="center"><font size=6 color=black>게시판</font></div>
-    <div class="right">
-        <ons-toolbar-button onclick="location.href='board_insertForm'">글쓰기</ons-toolbar-button>
+    <div class="right" style="vertical-align:middle; margin-top:15px;">
+        <ons-toolbar-button onclick="location.href='board_insertForm'"><ons-icon icon="ion-ios-compose"></ons-icon></ons-toolbar-button>
     </div>
   </ons-toolbar>
 
