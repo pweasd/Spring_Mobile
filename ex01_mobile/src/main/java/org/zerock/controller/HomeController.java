@@ -1,0 +1,171 @@
+package org.zerock.controller;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.zerock.domain.BoardVO;
+import org.zerock.domain.Criteria;
+import org.zerock.domain.PageMaker;
+import org.zerock.persistence.BoardDAO;
+import org.zerock.service.BoardService;
+import org.zerock.test.UserHibernateProviderImpl;
+
+/**
+ * Handles requests for the application home page.
+ */
+@Controller
+public class HomeController {
+	//로그찍어서 보기
+	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+	
+	/**
+	 * Simply selects the home view to render by returning its name.
+	 */
+//	@RequestMapping(value = "/", method = RequestMethod.GET)
+//	public String home(Locale locale, Model model) {
+//		logger.info("Welcome home! The client locale is {}.", locale);
+//		
+//		Date date = new Date();
+//		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
+//		
+//		String formattedDate = dateFormat.format(date);
+//		
+//		model.addAttribute("serverTime", formattedDate );
+//		
+//		return "home";
+//	}
+	//대부분은 서비스클래스를 불러와서 처리하고 BoardDAO는 조회수 업데이트용으로만
+	@Inject
+	private BoardDAO dao;
+	//해당 클래스로 로직 처리 
+	@Inject
+	private BoardService service;
+	//초기 리스트화면 출력
+	@RequestMapping(value = "/", method = RequestMethod.GET)
+	public String registerGET(BoardVO board,Model model)throws Exception {
+		//logger.info(board.toString());
+		//insert
+		//dao.create(board);
+		//List<BoardVO> list;
+		//list = service.listAll();
+		//model.addAttribute("list", list);
+		return "redirect:board_listPage";
+	}
+//	@RequestMapping(value = "board_view", method = RequestMethod.GET)
+//	public String read(@RequestParam("id") int id, Model model)throws Exception{
+//		
+//		model.addAttribute(service.read(id));
+//		//��ȸ�� ������Ʈ
+//		dao.updateview(id);
+//	
+//		return "board_view";
+//	}
+	//게시글 보는 페이지 id값과 
+	@RequestMapping(value = "board_viewPage", method = RequestMethod.GET)
+	public String read(@RequestParam("id") int id,@ModelAttribute("cri") Criteria cri, Model model)throws Exception{
+		
+		model.addAttribute(service.read(id));
+		//��ȸ�� ������Ʈ
+		dao.updateview(id);
+	
+		return "board_viewPage";
+	}
+	//�۾��� ����d
+	@RequestMapping(value="board_insertForm")
+	public String insertForm(Model model) {
+	
+		SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		Date currentTime = new Date();
+		//����ð�
+		model.addAttribute("datetime", dayTime.format(currentTime));
+		return "board_insertForm";
+	}
+	//��ҹ�ư(��Ϲ�ư)
+	@RequestMapping("list")
+	public String list() {
+		
+		return "redirect:/";
+	}
+
+	//�����ư
+	@RequestMapping(value="board_write",method = RequestMethod.POST)
+	public String write(BoardVO board)throws Exception {
+		logger.info(board.toString());
+		
+		service.regist(board);
+		return "redirect:/";
+	}
+	//���� ����
+	@RequestMapping(value="board_updateForm", method = RequestMethod.GET)
+	public String updateForm(@RequestParam("id") int id,@ModelAttribute("cri") Criteria cri, Model model)throws Exception{
+		//sql�����Ҷ� ���� �ʿ������, ���� �ѱ涩 �ʿ���
+		model.addAttribute(service.read(id));
+		return "board_updateForm";
+	}
+	//������ư
+	@RequestMapping(value="board_update", method = RequestMethod.POST)
+	public String update(@RequestParam("id") int id, @RequestParam("title") String title,
+			@RequestParam("content") String content,BoardVO board,Criteria cri, RedirectAttributes rttr)throws Exception {
+//		BoardVO bo = new BoardVO();
+//		bo.setId(id);
+//		bo.setTitle(title);
+//		bo.setContent(content);
+//		
+//		service.modify(bo);
+		service.modify(board);
+		
+		rttr.addAttribute("page", cri.getPage());
+		rttr.addAttribute("perPageNum",cri.getPerPageNum());
+		rttr.addFlashAttribute("msg","SUCCESS");
+		
+		return "redirect:board_listPage";
+	}
+	//������ư
+	@RequestMapping(value="board_delete", method = RequestMethod.POST)
+	public String delete(@RequestParam("id") int id,
+			Criteria cri,
+				RedirectAttributes rttr)throws Exception{
+		
+		service.remove(id);
+		
+		rttr.addAttribute("page", cri.getPage());
+		rttr.addAttribute("perPageNum", cri.getPerPageNum());
+		rttr.addFlashAttribute("msg","SUCCESS");		
+		
+		return "redirect:board_listPage";
+	}
+	@RequestMapping(value = "board_listPage", method = RequestMethod.GET)
+	public String testpage(@ModelAttribute("cri")Criteria cri,Model model)throws Exception {
+	
+		model.addAttribute("list", service.listCriteria(cri));
+		PageMaker pageMaker = new PageMaker();
+		pageMaker.setCri(cri);
+		//pageMaker.setTotalCount(14);
+		pageMaker.setTotalCount(service.listCountPaging(cri));
+		model.addAttribute("pageMaker", pageMaker);
+		return "board_listPage";
+	}
+//	@RequestMapping(value = "mocrok", method = RequestMethod.GET)
+//	public String mocrok(@RequestParam("id") int id, Model model,
+//			@ModelAttribute("cri") Criteria cri)throws Exception {
+//		
+//		model.addAttribute(service.read(id));
+//		//return "redirect:/";
+//		return "redirect:board_listPage";
+//	}
+	
+}
