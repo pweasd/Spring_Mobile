@@ -41,14 +41,16 @@
 		<th class="table-active"><font color=white>내용</font></th><!--내용에 들어가는 스크롤바 중 가로 스크롤바 숨기고 세로 스크롤바 오토-->
 		<td><textarea body style="resize:none;width:100%; overflow-x:hidden; overflow-y:auto;" name="content" cols="100" rows="13" required></textarea></td>
 	</tr>
-	<tr>
-		<th class="table-active"><font color=white>첨부파일</font></th><!--첨부파일 3개-->
+	<!-- 
+	<tr>	
+		<th class="table-active"><font color=white>첨부파일</font></th>
 		<td>
 		<input type="file" name="uploadFile" id="uploadFile"> 
 		<input type="file" name="uploadFile2" id="uploadFile2">
 		<input type="file" name="uploadFile3" id="uploadFile3">
 		</td>			
 	</tr>
+ -->
 </tbody>
 </table>
 <table width = 100% border = 0>
